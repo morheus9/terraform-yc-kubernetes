@@ -1,5 +1,47 @@
 # Kubernetes Terraform Module for Yandex.Cloud
 
+1. Install **yc** cli:
+```
+curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+```
+2. Get [OAuth token](https://oauth.yandex.ru/verification_code) and log in via the Yandex Cloud console under the required service account:
+```
+yc init
+```
+3. Check the variables of modules
+4. Install Terraform
+```
+sudo snap install terraform --classic
+```
+5. Set up a teraform by specifying a provider:
+```
+sudo nano ~/.terraformrc
+```
+```
+provider_installation {
+  network_mirror {
+    url = "https://terraform-mirror.yandexcloud.net/"
+    include = ["registry.terraform.io/*/*"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/*/*"]
+  }
+}
+```
+6. Export envs:
+```
+export TF_VAR_cloud_id=$(yc config get cloud-id)
+export TF_VAR_folder_id=$(yc config get folder-id)
+export TF_VAR_token=$(yc iam create-token)
+```
+7. Change *subnet_id* and *network_id* in main
+8. Apply:
+```
+cd ./examples/example-6-cluster-with-nginx
+terraform init
+terraform plan
+terraform apply -auto-approve
+
 ## Features
 
 - Create Kubernetes cluster of two types: zonal or regional 

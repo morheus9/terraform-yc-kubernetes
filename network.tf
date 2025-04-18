@@ -139,3 +139,52 @@ resource "yandex_vpc_security_group_rule" "egress_rules" {
   port                   = lookup(each.value, "port", null)
   protocol               = lookup(each.value, "protocol", "TCP")
 }
+#__________________________________
+
+# Создание VPC сети
+resource "yandex_vpc_network" "k8s_network" {
+  name        = "k8s-network"
+  description = "Network for Kubernetes cluster"
+}
+
+# Создание NAT-шлюза для исходящего трафика
+resource "yandex_vpc_gateway" "nat_gateway" {
+  name = "k8s-nat-gateway"
+
+  shared_egress_gateway {} # Тип шлюза для исходящего трафика
+}
+
+# Создание таблицы маршрутизации NAT
+resource "yandex_vpc_route_table" "nat_route" {
+  name       = "k8s-nat-route"
+  network_id = yandex_vpc_network.k8s_network.id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0" # Весь исходящий трафик
+    gateway_id         = yandex_vpc_gateway.nat_gateway.id
+  }
+}
+
+# Создание подсетей в разных зонах (например, для мастера или служб)
+resource "yandex_vpc_subnet" "k8s_subnets" {
+  for_each = {
+    "ru-central1-a" = "10.10.1.0/24",
+    "ru-central1-b" = "10.10.2.0/24",
+    "ru-central1-d" = "10.10.3.0/24"
+  }
+
+  name           = "k8s-subnet-${each.key}"
+  zone           = each.key
+  network_id     = yandex_vpc_network.k8s_network.id
+  v4_cidr_blocks = [each.value]
+  route_table_id = yandex_vpc_route_table.nat_route.id // Привязываем маршруты
+}
+
+# Если нужна отдельная подсеть (например, для нод), создадим её через тот же network_id
+resource "yandex_vpc_subnet" "node_subnet" {
+  name           = "node-subnet"
+  zone           = "ru-central1-a"
+  network_id     = yandex_vpc_network.k8s_network.id
+  v4_cidr_blocks = ["10.1.0.0/24"]
+  route_table_id = yandex_vpc_route_table.nat_route.id
+}

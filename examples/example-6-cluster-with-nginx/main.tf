@@ -1,12 +1,11 @@
 module "kube" {
-  source = "../../"
-
-  network_id = "enpemhfq3bg3i9f0vxxx"
-
+  source     = "../../"
+  network_id = "enpkfq74bpp8f9fm5u0e"
   master_locations = [
     {
       zone      = "ru-central1-a"
-      subnet_id = "e9bt2qj2vufbh273pxxx"
+      subnet_id = "e9b07vvbm1bhek1scaqd"
+
     }
   ]
 
@@ -43,7 +42,7 @@ module "kube" {
   }
 
 }
-
+#_________________________________________________________________________________
 module "addons" {
   source = "github.com/terraform-yc-modules/terraform-yc-kubernetes-marketplace"
 
@@ -175,7 +174,7 @@ module "addons" {
   ingress_nginx = {
     replica_count = 1
     # service_loadbalancer_ip             = null
-    # service_external_traffic_policy     = "Cluster" # Cluster or Local
+    service_external_traffic_policy = "Cluster" # Cluster or Local
   }
 
   istio = {
