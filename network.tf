@@ -165,7 +165,7 @@ resource "yandex_vpc_route_table" "nat_route" {
   }
 }
 
-# Создание подсетей в разных зонах (например, для мастера или служб)
+# Создание подсетей в разных зонах
 resource "yandex_vpc_subnet" "k8s_subnets" {
   for_each = {
     "ru-central1-a" = "10.10.1.0/24",
@@ -187,4 +187,13 @@ resource "yandex_vpc_subnet" "node_subnet" {
   network_id     = yandex_vpc_network.k8s_network.id
   v4_cidr_blocks = ["10.1.0.0/24"]
   route_table_id = yandex_vpc_route_table.nat_route.id
+}
+
+output "k8s_network_id" {
+  description = "ID созданной сети Kubernetes"
+  value       = yandex_vpc_network.k8s_network.id
+}
+
+output "k8s_subnet_ru_central1_a_id" {
+  value = yandex_vpc_subnet.k8s_subnets["ru-central1-a"].id
 }

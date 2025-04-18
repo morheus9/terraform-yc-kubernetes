@@ -1,11 +1,24 @@
 module "kube" {
-  source     = "../../"
-  network_id = "enpkfq74bpp8f9fm5u0e"
+  source = "../../"
+
+  cluster_name         = "k8s-cluster-test-01"
+  network_id           = module.kube.k8s_network_id
+  enable_cilium_policy = true
+  public_access        = true
+  service_ipv4_range   = "172.20.0.0/16"
+  service_account_name = "k8s-cluster-test-01-service-account"
+  node_account_name    = "k8s-cluster-test-01-node-account"
+  create_kms           = true
+  #cluster_version      = "1.28"
+  #release_channel      = "REGULAR"
+  #folder_id            = "b1g4cr5d305a2bsm2im0"
+  #create_kms           = true
+  #cluster_ipv4_range   = "172.19.0.0/16"
+
   master_locations = [
     {
       zone      = "ru-central1-a"
-      subnet_id = "e9b07vvbm1bhek1scaqd"
-
+      subnet_id = module.kube.k8s_subnet_ru_central1_a_id
     }
   ]
 
@@ -42,7 +55,9 @@ module "kube" {
   }
 
 }
+
 #_________________________________________________________________________________
+
 module "addons" {
   source = "github.com/terraform-yc-modules/terraform-yc-kubernetes-marketplace"
 
