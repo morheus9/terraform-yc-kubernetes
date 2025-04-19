@@ -11,7 +11,7 @@ yc init
 3. Check the variables of modules
 4. Install Terraform
 ```
-sudo snap install terraform --classic
+snap install terraform --classic
 ```
 5. Set up a teraform by specifying a provider:
 ```
